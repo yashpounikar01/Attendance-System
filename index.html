@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Face Recognition Attendance System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Face Recognition Attendance System</h1>
+        <br>
+        <br>
+        <video id="video" width="100%" height="auto" autoplay></video>
+        <button id="captureButton">Capture Attendance</button>
+        <input type="file" id="imageInput" accept="image/*" capture="environment">
+        <img id="capturedImage" style="display: none;" width="100%" height="auto">
+    </div>
+
+    <script src="script.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+</body>
+</html>
