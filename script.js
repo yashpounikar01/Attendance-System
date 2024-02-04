@@ -1,59 +1,22 @@
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', function () {
     const video = document.getElementById('video');
     const captureButton = document.getElementById('captureButton');
     const capturedImage = document.getElementById('capturedImage');
     const imageInput = document.getElementById('imageInput');
 
-    async function loadModels() {
-        try {
-            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-        } catch (error) {
-            console.error('Error loading models:', error);
-            alert('Error loading models. Please check the console for details.');
-        }
+    // Check if the browser supports navigator.mediaDevices
+    if (navigator.mediaDevices) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error('Error accessing webcam:', error);
+            });
+    } else {
+        alert('navigator.mediaDevices is not supported in this browser.');
     }
 
-    async function startFaceDetection() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            video.srcObject = stream;
-
-            await new Promise(resolve => video.onloadedmetadata = resolve);
-
-            const canvas = faceapi.createCanvasFromMedia(video);
-            document.body.append(canvas);
-
-            const displaySize = { width: video.videoWidth, height: video.videoHeight };
-            faceapi.matchDimensions(canvas, displaySize);
-
-            setInterval(async () => {
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
-
-                const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-                faceapi.draw.drawDetections(canvas, resizedDetections);
-
-                // Draw a red box around each detected face
-                resizedDetections.forEach((detection) => {
-                    const box = detection.detection.box;
-                    const drawBox = new faceapi.draw.DrawBox(box, { label: 'Face' });
-                    drawBox.draw(canvas);
-                });
-            }, 100);
-        } catch (error) {
-            console.error('Error accessing webcam:', error);
-            alert('Error accessing webcam. Please check permissions and try again.');
-        }
-    }
-
-
-    // Load face detection models before starting face detection
-    await loadModels();
-
-    // Start face detection after models are loaded
-    await startFaceDetection(video);
     // Handle the button click to capture attendance
     captureButton.addEventListener('click', function () {
         // Capture a frame from the video
@@ -131,7 +94,4 @@ document.addEventListener('DOMContentLoaded', async function () {
             reader.readAsDataURL(file);
         }
     });
-
-    // Start face detection after DOMContentLoaded
-    await startFaceDetection(video);
 });
