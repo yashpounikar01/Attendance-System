@@ -5,31 +5,31 @@ document.addEventListener('DOMContentLoaded', async function () {
     const imageInput = document.getElementById('imageInput');
 
     async function loadModels() {
-        return Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-            faceapi.nets.faceRecognitionNet.loadFromUri('/models')
-        ]);
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        } catch (error) {
+            console.error('Error loading models:', error);
+            alert('Error loading models. Please check the console for details.');
+        }
     }
 
-    async function startFaceDetection(videoElement) {
+    async function startFaceDetection() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             video.srcObject = stream;
 
-            // Wait for the video metadata to be loaded
-            await new Promise(resolve => {
-                video.onloadedmetadata = resolve;
-            });
+            await new Promise(resolve => video.onloadedmetadata = resolve);
 
-            const canvas = faceapi.createCanvasFromMedia(videoElement);
+            const canvas = faceapi.createCanvasFromMedia(video);
             document.body.append(canvas);
 
-            const displaySize = { width: videoElement.width, height: videoElement.height };
+            const displaySize = { width: video.videoWidth, height: video.videoHeight };
             faceapi.matchDimensions(canvas, displaySize);
 
             setInterval(async () => {
-                const detections = await faceapi.detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
 
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
                 canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             alert('Error accessing webcam. Please check permissions and try again.');
         }
     }
+
 
     // Load face detection models before starting face detection
     await loadModels();
