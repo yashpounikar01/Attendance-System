@@ -27,18 +27,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 100);
     }
 
-    // Check if the browser supports navigator.mediaDevices
-    if (navigator.mediaDevices) {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-            .then((stream) => {
-                video.srcObject = stream;
-            })
-            .catch((error) => {
-                console.error('Error accessing webcam:', error);
-            });
-    } else {
-        alert('navigator.mediaDevices is not supported in this browser.');
-    }
+    video.addEventListener('loadeddata', function () {
+    startFaceDetection(video);
+});
+
+// Check if the browser supports navigator.mediaDevices
+if (navigator.mediaDevices) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then((stream) => {
+            video.srcObject = stream;
+        })
+        .catch((error) => {
+            console.error('Error accessing webcam:', error);
+        });
+} else {
+    alert('navigator.mediaDevices is not supported in this browser.');
+}
 
     // Handle the button click to capture attendance
     captureButton.addEventListener('click', function () {
