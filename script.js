@@ -1,10 +1,9 @@
-document.addEventListener('DOMContentLoaded', function () {
+ddocument.addEventListener('DOMContentLoaded', function () {
     const video = document.getElementById('video');
     const captureButton = document.getElementById('captureButton');
     const capturedImage = document.getElementById('capturedImage');
     const imageInput = document.getElementById('imageInput');
 
-    // Check if the browser supports navigator.mediaDevices
     if (navigator.mediaDevices) {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
             .then((stream) => {
@@ -17,23 +16,18 @@ document.addEventListener('DOMContentLoaded', function () {
         alert('navigator.mediaDevices is not supported in this browser.');
     }
 
-    // Handle the button click to capture attendance
     captureButton.addEventListener('click', function () {
-        // Capture a frame from the video
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Convert the frame to a data URL
         const imageDataURL = canvas.toDataURL('image/png');
 
-        // Display the captured image on the page
         capturedImage.src = imageDataURL;
         capturedImage.style.display = 'block';
 
-        // Convert the data URL to a Blob
         const byteString = atob(imageDataURL.split(',')[1]);
         const arrayBuffer = new ArrayBuffer(byteString.length);
         const uint8Array = new Uint8Array(arrayBuffer);
@@ -42,11 +36,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const blob = new Blob([arrayBuffer], { type: 'image/png' });
 
-        // Create a FormData object and append the Blob
         const formData = new FormData();
         formData.append('image', blob, 'captured-image.png');
 
-        // Send the image to the server using fetch (adjust the URL accordingly)
         fetch('/upload', {
             method: 'POST',
             body: formData,
@@ -62,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Handle image input change (for testing file upload)
     imageInput.addEventListener('change', function () {
         const file = imageInput.files[0];
 
@@ -95,3 +86,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
