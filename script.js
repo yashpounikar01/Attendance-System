@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Check if the browser supports navigator.mediaDevices
     if (navigator.mediaDevices) {
-        navigator.mediaDevices.getUserMedia({ video: true })
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
             .then((stream) => {
                 video.srcObject = stream;
             })
