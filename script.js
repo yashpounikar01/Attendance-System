@@ -4,6 +4,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const capturedImage = document.getElementById('capturedImage');
     const imageInput = document.getElementById('imageInput');
 
+    function startFaceDetection(videoElement) {
+        const canvas = faceapi.createCanvasFromMedia(videoElement);
+        document.body.append(canvas);
+
+        const displaySize = { width: videoElement.width, height: videoElement.height };
+        faceapi.matchDimensions(canvas, displaySize);
+
+        setInterval(async () => {
+            const detections = await faceapi.detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+            
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            faceapi.draw.drawDetections(canvas, resizedDetections);
+
+            // Draw a red box around each detected face
+            resizedDetections.forEach((detection) => {
+                const box = detection.detection.box;
+                const drawBox = new faceapi.draw.DrawBox(box, { label: 'Face' });
+                drawBox.draw(canvas);
+            });
+        }, 100);
+    }
+
     // Check if the browser supports navigator.mediaDevices
     if (navigator.mediaDevices) {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
