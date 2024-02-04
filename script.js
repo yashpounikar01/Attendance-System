@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     const video = document.getElementById('video');
     const captureButton = document.getElementById('captureButton');
     const capturedImage = document.getElementById('capturedImage');
     const imageInput = document.getElementById('imageInput');
 
-    function startFaceDetection(videoElement) {
+    async function startFaceDetection(videoElement) {
         const canvas = faceapi.createCanvasFromMedia(videoElement);
         document.body.append(canvas);
 
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         setInterval(async () => {
             const detections = await faceapi.detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
-            
+
             const resizedDetections = faceapi.resizeResults(detections, displaySize);
             canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
             faceapi.draw.drawDetections(canvas, resizedDetections);
@@ -27,22 +27,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 100);
     }
 
-    video.addEventListener('loadeddata', function () {
-    startFaceDetection(video);
-});
-
-// Check if the browser supports navigator.mediaDevices
-if (navigator.mediaDevices) {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then((stream) => {
+    // Check if the browser supports navigator.mediaDevices
+    if (navigator.mediaDevices) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             video.srcObject = stream;
-        })
-        .catch((error) => {
+
+            // Wait for the video to load and get its dimensions
+            video.addEventListener('loadeddata', function () {
+                startFaceDetection(video);
+            });
+        } catch (error) {
             console.error('Error accessing webcam:', error);
-        });
-} else {
-    alert('navigator.mediaDevices is not supported in this browser.');
-}
+        }
+    } else {
+        alert('navigator.mediaDevices is not supported in this browser.');
+    }
 
     // Handle the button click to capture attendance
     captureButton.addEventListener('click', function () {
