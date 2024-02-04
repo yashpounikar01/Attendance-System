@@ -5,43 +5,37 @@ document.addEventListener('DOMContentLoaded', async function () {
     const imageInput = document.getElementById('imageInput');
 
     async function startFaceDetection(videoElement) {
-        const canvas = faceapi.createCanvasFromMedia(videoElement);
-        document.body.append(canvas);
-
-        const displaySize = { width: videoElement.width, height: videoElement.height };
-        faceapi.matchDimensions(canvas, displaySize);
-
-        setInterval(async () => {
-            const detections = await faceapi.detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
-
-            const resizedDetections = faceapi.resizeResults(detections, displaySize);
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-            faceapi.draw.drawDetections(canvas, resizedDetections);
-
-            // Draw a red box around each detected face
-            resizedDetections.forEach((detection) => {
-                const box = detection.detection.box;
-                const drawBox = new faceapi.draw.DrawBox(box, { label: 'Face' });
-                drawBox.draw(canvas);
-            });
-        }, 100);
-    }
-
-    // Check if the browser supports navigator.mediaDevices
-    if (navigator.mediaDevices) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             video.srcObject = stream;
 
             // Wait for the video to load and get its dimensions
-            video.addEventListener('loadeddata', function () {
-                startFaceDetection(video);
-            });
+            await new Promise(resolve => video.addEventListener('loadeddata', resolve));
+
+            const canvas = faceapi.createCanvasFromMedia(videoElement);
+            document.body.append(canvas);
+
+            const displaySize = { width: videoElement.width, height: videoElement.height };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            setInterval(async () => {
+                const detections = await faceapi.detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawDetections(canvas, resizedDetections);
+
+                // Draw a red box around each detected face
+                resizedDetections.forEach((detection) => {
+                    const box = detection.detection.box;
+                    const drawBox = new faceapi.draw.DrawBox(box, { label: 'Face' });
+                    drawBox.draw(canvas);
+                });
+            }, 100);
         } catch (error) {
             console.error('Error accessing webcam:', error);
+            alert('Error accessing webcam. Please check permissions and try again.');
         }
-    } else {
-        alert('navigator.mediaDevices is not supported in this browser.');
     }
 
     // Handle the button click to capture attendance
@@ -121,4 +115,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             reader.readAsDataURL(file);
         }
     });
+
+    // Start face detection after DOMContentLoaded
+    await startFaceDetection(video);
 });
