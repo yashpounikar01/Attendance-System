@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function startFaceDetection(videoElement) {
         try {
+            // Load face detection models
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             video.srcObject = stream;
 
@@ -37,7 +42,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             alert('Error accessing webcam. Please check permissions and try again.');
         }
     }
-
     // Handle the button click to capture attendance
     captureButton.addEventListener('click', function () {
         // Capture a frame from the video
