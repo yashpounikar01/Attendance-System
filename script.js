@@ -4,18 +4,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     const capturedImage = document.getElementById('capturedImage');
     const imageInput = document.getElementById('imageInput');
 
+    async function loadModels() {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+    }
+
     async function startFaceDetection(videoElement) {
         try {
-            // Load face detection models
-            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             video.srcObject = stream;
 
-            // Wait for the video to load and get its dimensions
-            await new Promise(resolve => video.addEventListener('loadeddata', resolve));
+            await new Promise(resolve => {
+                video.addEventListener('loadeddata', resolve);
+            });
 
             const canvas = faceapi.createCanvasFromMedia(videoElement);
             document.body.append(canvas);
@@ -42,6 +44,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             alert('Error accessing webcam. Please check permissions and try again.');
         }
     }
+
+    // Load face detection models before starting face detection
+    await loadModels();
+
+    // Start face detection after models are loaded
+    await startFaceDetection(video);
     // Handle the button click to capture attendance
     captureButton.addEventListener('click', function () {
         // Capture a frame from the video
