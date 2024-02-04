@@ -5,9 +5,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const imageInput = document.getElementById('imageInput');
 
     async function loadModels() {
-        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        return Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+        ]);
     }
 
     async function startFaceDetection(videoElement) {
@@ -15,8 +17,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             video.srcObject = stream;
 
+            // Wait for the video metadata to be loaded
             await new Promise(resolve => {
-                video.addEventListener('loadeddata', resolve);
+                video.onloadedmetadata = resolve;
             });
 
             const canvas = faceapi.createCanvasFromMedia(videoElement);
