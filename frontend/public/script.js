@@ -4,7 +4,7 @@ document.getElementById('registerForm').addEventListener('submit', function (eve
     const password = document.getElementById('password').value;
     const adminCode = document.getElementById('adminCode').value;
 
-    fetch('/auth/register', {
+    fetch('https://attendance-system-production.up.railway.app/auth/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -29,7 +29,7 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
     const username = document.getElementById('loginUsername').value;
     const password = document.getElementById('loginPassword').value;
 
-    fetch('/auth/login', {
+    fetch('https://attendance-system-production.up.railway.app/auth/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ document.getElementById('attendanceForm').addEventListener('submit', function (e
     const rollNumbers = document.getElementById('rollNumbers').value;
     const attendanceDate = document.getElementById('attendanceDate').value;
 
-    fetch('/lecture/mark-attendance', {
+    fetch('https://attendance-system-production.up.railway.app/lecture/mark-attendance', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
